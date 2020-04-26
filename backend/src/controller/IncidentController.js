@@ -5,17 +5,16 @@ module.exports = {
         const { page = 1 } = request.query;
 
         const [count] = await connection('incidents').count();
+        response.header('X-Total-Count', count['count(*)']);
 
         const pageOffset = 5;
-        const ongs = await connection('incidents')
+        const incidents = await connection('incidents')
             .join('ongs', 'ongs.id', '=', 'incidents.ong_id')
             .limit(pageOffset)
             .offset((page - 1) * pageOffset)
             .select(['incidents.*', 'ongs.name', 'ongs.email', 'ongs.whatsapp', 'ongs.city', 'ongs.uf']);
-            
-        response.header('X-Total-Count', count['count(*)']);
 
-        return response.json(ongs);
+        return response.json(incidents);
     },
 
     async create (request, response) {
